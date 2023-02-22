@@ -1,40 +1,29 @@
-require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+platform :ios, '9.0'
 
-platform :ios, '12.4'
-install! 'cocoapods', :deterministic_uuids => false
+target 'RNGoogleCastExample' do
+  rnpath = '../../node_modules/react-native'
+  pod 'React', path: rnpath, subspecs: [
+    'Core',
+    'CxxBridge', # Include this for RN >= 0.47
+    'DevSupport', # Include this to enable In-App Devmenu if RN >= 0.43
+    'RCTText',
+    'RCTNetwork',
+    'RCTWebSocket', # Needed for debugging
+    'RCTAnimation', # Needed for FlatList and animations running on native UI thread
+    'RCTImage'
+  ]
+  pod 'yoga', path: "#{rnpath}/ReactCommon/yoga"
+  pod 'DoubleConversion', podspec: "#{rnpath}/third-party-podspecs/DoubleConversion.podspec"
+  pod 'glog', podspec: "#{rnpath}/third-party-podspecs/glog.podspec"
+  pod 'Folly', podspec: "#{rnpath}/third-party-podspecs/Folly.podspec"
 
-production = ENV["PRODUCTION"] == "1"
-
-target 'CastVideos' do
-  config = use_native_modules!
-
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
-  use_react_native!(
-    :path => config[:reactNativePath],
-    # to enable hermes on iOS, change `false` to `true` and then install pods
-    :production => production,
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
-    :flipper_configuration => FlipperConfiguration.enabled,
-    # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
-  )
-
-  # Note that the example is in a relative location to the library's root directory.
-  # In your project you'll need to set the path to node_modules instead:
-  # pod 'react-native-google-cast/NoBluetoothArm', path: '../node_modules/react-native-google-cast/'
-  pod 'react-native-google-cast/NoBluetoothArm', path: '../../'
-
-  target 'CastVideosTests' do
-    inherit! :complete
-    # Pods for testing
-  end
-
-  post_install do |installer|
-    react_native_post_install(installer)
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
-  end
+  pod 'react-native-google-cast/NoBluetooth', path: '../../ios/'
 end
+
+# post_install do |installer|
+#   installer.pods_project.targets.each do |target|
+#     if target.name == 'React'
+#       target.remove_from_project
+#     end
+#   end
+# end
